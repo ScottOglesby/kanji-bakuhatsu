@@ -1,0 +1,53 @@
+.portal {
+  border: 1px solid lightgray;
+  border-radius: 8px;
+  background: #ffe;
+}
+#visgraph {
+  height: 320px;
+}
+#details table th {
+	white-space: nowrap;
+	vertical-align: top;
+}
+#details table td {
+	vertical-align: top;
+}
+#details table {
+	border-collapse: collapse;
+	border-spacing: 80px 4px;
+	table-layout: auto;
+}
+#kanji777 {
+	padding-top: 0;
+	font-size: 5em;
+}
+#legend p {
+	border: 1px solid #444;	
+	border-radius: 8px;
+	margin: 8px;
+	padding-left: 8px;
+	padding-right: 8px;
+}
+.kanji-main {
+	background: #ACEDED;
+	font-size: 150%;
+}
+.kanji-other {
+	background: #ACEDED;
+}
+.kanji-partof {
+	background: #C5B7F1;
+}
+.kanji-radical {
+	background: #B3F6B3;
+}
+.kanji-shared-onyomi {
+	background: #FFD9BA;
+}
+.kanji-no-dict {
+	border: 1px dashed #444 !important;
+	background: #FFBABA;
+}
+
+th { text-align: right; }
