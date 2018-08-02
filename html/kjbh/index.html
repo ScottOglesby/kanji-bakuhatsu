@@ -1,0 +1,137 @@
+<!DOCTYPE HTML>
+<html lang="en">
+<head>
+	<title>Kanji Bakuhatsu - Kurumi.com</title>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+	<link rel="stylesheet" href="/jp/css/custom.css">
+	<link rel="stylesheet" href="/jp/css/kjbh.css">
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
+	<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+	<script src="https://gitcdn.github.io/bootstrap-toggle/2.2.2/js/bootstrap-toggle.min.js"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/vis/4.21.0/vis.min.js"></script>
+	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/vis/4.21.0/vis.min.css">
+</head>
+<body>
+	<script src="https://cdn.rawgit.com/ScottOglesby/kanji-bakuhatsu/ead605f6/kanji-dict.js"></script>
+	<script src="/jp/js/kjbh-composition.js"></script>
+	<script src="/jp/js/kjbh-radical-defs.js"></script>
+	<script src="/jp/js/kjbh-ijidoukun.js"></script>
+	<script src="/jp/js/common.js"></script>
+<!-- 	No standard header for this page -->
+
+<div class="container">
+	<div class="row">
+		<div class="col-sm-9">
+			<div style="position:relative">
+				<div id="visgraph" class="portal"></div>
+				<!-- lookup -->
+				<div class="input-group" id="lookup-group">
+					<input type="text" class="form-control" id="lookup_kanji" placeholder="Search...">
+					<span class="input-group-btn">
+						<button class="btn btn-default" type="button" onclick="lookup();">
+						<span class="glyphicon glyphicon-search" aria-hidden="true"></span>
+						</button>
+					</span>
+				</div>
+				<!-- suggest random -->
+				<button type="button" id="suggest-group" class="btn btn-default" onclick="chooseRandom();"> お任せ </button>
+				<!-- Trigger the modal with a button -->
+				<button type="button" id="help-group" class="btn btn-default" data-toggle="modal" data-target="#myModal">説明</button>
+
+				<!-- Modal parade of divs -->
+				<div id="myModal" class="modal fade" role="dialog">
+					<div class="modal-dialog">
+						<div class="modal-content">
+						<div class="modal-header">
+							<button type="button" class="close" data-dismiss="modal">&times;</button>
+							<h4 class="modal-title">About 漢字爆発 ("Kanji Explosion")</h4>
+						</div>
+						<div class="modal-body">
+							<p><b>Click</b> on any kanji to show dictionary information; <b>double-click</b> to make that kanji the main one.</p>
+							<p>I built this tool to explore all components of kanji&mdash;not just radicals&mdash;and find relations to other kanji. For example, 塾 and 熟 have different radicals, but have 11 strokes in common: a third kanji (孰) with the same onyomi (ジュク) as the others.</p>
+							<p>A component could convey sound or meaning; or it could be a result of changes and simplifications over time. This tool looks purely at visual connections and avoids making deeper conclusions that could be wrong. It does point out:</p>
+							<ul>
+							<li>Shared onyomi or shared kunyomi + meaning</li>
+							<li>Alternate forms of radical</li>
+							</ul>
+							<p>At least two similar sites are worth checking out:</p>
+							<ul>
+							<li><a href="http://suiren.io/">Suiren</a> (hop between compounds)</li>
+							<li><a href="https://thekanjimap.com/index.html">The Kanji Map</a> (similar to this tool, and was there first :-)</li>
+							</ul>
+							<h2>Legend</h2>
+							<div id="legend" class="portal">
+								<p class="kanji-main">Main Kanji</p>
+								<p class="kanji-other">Part of Main</p>
+								<p class="kanji-partof">Contains Main</p>
+								<p class="kanji-radical">Radical of Main</p>
+								<p class="kanji-shared-onyomi">Shared 音読み with Main</p>
+								<p class="kanji-ijidoukun">Shared 訓読み and meaning with Main</p>
+								<p class="kanji-no-dict">No dictionary info</p>
+							</div>															
+						</div>
+						<div class="modal-footer">
+							<button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+						</div>
+					</div>
+
+					</div>
+				</div>
+			</div>
+		</div>
+		
+		<div class="col-sm-3" id="side-panel">
+			<div class="row">
+				<div class="kjbh-head">
+					<h1>クルミの<span class="red">日本語</span></h1>
+					<p><a href="/">Home</a> / <a href="/jp">Japanese</a> / <a href="/jp/tools.html">Tools</a>
+					<h2>漢字爆発 - Kanji Explosion</h2>
+				</div>
+				<div>
+					<table>
+					<tr>
+					<td id="kanji777"></td>
+					<td style="padding-left: 1em">
+					<span id="jouyou-yesno" class="kanji-group-indicator">常用</span>
+					</td>
+					</tr>
+					</table>
+				</div>
+
+				<div id="details">
+					<table class="table">
+						<tr>
+							<th>音読み</th>
+							<td id="onyomi" style="width: 100%"></td>
+						</tr>
+						<tr>
+							<th>訓読み</th>
+							<td id="kunyomi"></td>
+						</tr>
+						<tr>
+							<th>意味</th>
+							<td id="meanings"></td>
+						</tr>
+					</table>
+				</div>
+			</div>
+			<div class="row">
+				<table class="table">
+					<tr>
+					<th style="word-break: keep-all">探索した</th>
+					<td style="width:100%" id="looked_up"></td>
+					</tr>
+					<tr>
+					<th style="word-break: keep-all">最近</th>
+					<td style="width:100%" id="recent"></td>
+					</tr>
+				</table>
+			</div>
+		</div>
+	</div>
+</div>
+<script src="/jp/js/kjbh-logic.js"></script>
+</body>
+</html>

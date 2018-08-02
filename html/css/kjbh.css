@@ -3,8 +3,12 @@
   border-radius: 8px;
   background: #ffe;
 }
+/* experimental */
+body, html {
+	height: 100%;
+}
 #visgraph {
-  height: 320px;
+  height: 100vh;
 }
 #details table th {
 	white-space: nowrap;
@@ -49,5 +53,50 @@
 	border: 1px dashed #444 !important;
 	background: #FFBABA;
 }
+.kanji-ijidoukun {
+	background: #FFE270;
+}
 
 th { text-align: right; }
+td { vertical-align: top; }
+
+.kjbh-head, ul.breadcrumb { background: #333; color: #eee; }
+.kjbh-head { padding: 0.25em 0.5em; }
+.kjbh-head h2 { font-size: 1.5em; color: #ACEDED }
+
+.modal-body {
+    max-height: 70vh;
+    overflow-y: auto;
+}
+
+#lookup-group {
+	position: absolute;
+	z-index: 1;
+	left: 1em; 
+	top: 1em; 
+	width: 12em;
+}
+
+#suggest-group {
+	position: absolute;
+	z-index: 1;
+	left: 1em; 
+	top: 4em; 
+}
+
+#help-group {
+	position: absolute;
+	z-index: 1;
+	right: 1em; 
+	top: 1em; 
+}
+
+#side-panel {
+	overflow-y: scroll;
+	height: 100vh
+}
+
+.kanji-group-indicator {
+	font-size: 1.2em;
+	font-weight: bold;
+}

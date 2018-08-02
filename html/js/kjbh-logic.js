@@ -2,15 +2,13 @@
 // todo consider shinjitai and kyuujitai
 // todo export graph shown to text
 // todo show radical info if focused is radical
-// todo include parents of all forms of radical糸
-// todo shared kunyomi and meaning (sisters)
+// todo include parents of all forms of radical 糸
 // todo find most interesting longest/biggest top 10 and recommend them in looked up
 // todo find any duplicate kanji in trees
-// todo find parts that are not further defined or linked (maybe python)
 // todo standardize colors between CSS and vis.js
 
 // test cases:
-// 靴 - should not show synonym radicals for 化
+// 靴 - should not show synonym radicals for 化, since it's not the radical of main
 // ... I'm still undecided on that one
 
 // colors:
@@ -24,6 +22,15 @@ var nodes = [];
 var edges = [];
 var globalId = 0; // was 1
 
+// colors -- manually match to CSS for now
+var COLOR_MAIN = '#ACEDED';
+var COLOR_PARTOF = '#C5B7F1';
+var COLOR_RADICAL = '#B3F6B3';
+var COLOR_SHARED_ONYOMI = '#FFD9BA';
+var COLOR_NO_DICT = '#FFBABA';
+var COLOR_IJIDOUKUN = '#FFE270';
+
+// ensure each kanji node gets a new ID
 function getNewNodeId() {
 	globalId++;
 	return globalId;
@@ -37,21 +44,31 @@ var mostRecentlyUsed = {};
 // build graph based on selected, but downstream only.
 // we assume there are no cycles in the graph and do not check.
 // addParentNodes() for upstream logic is different
+// 'main' is the large kanji at the center of the graph
+// 'focused' is the kanji we are handling now (1st arg)
 function buildDescendantsGraph(kanji, parentId) {
 	var myId = getNewNodeId();
-	// make focused kanji slightly larger
+	// make main kanji slightly larger
 	var fontSize = parentId == 0 ? 60 : 40;
+	// thicker border for jouyou
+	var borderThickness = 1;
+	if (kanji in kanji_defs && kanji_defs[kanji].is_jouyou) {
+		borderThickness = 4;
+	}
+	// radical ID == 0 means this kanji is not a radical
+	var radical_id = 0; 
+	
 	// use different color code for matching on readings
 	// (implies that might be the purpose of this related kanji)
-	var color = '#ACEDED';
-	// focused kanji ID is 1
-	// if this is not the focused one, check for:
-	// * shared onyomi with focused
-	// * is radical of focused (in any form)
+	var color = COLOR_MAIN;
+	// main kanji ID is 1
+	// if this is not the main one, check for:
+	// * shared onyomi with main
+	// * is radical of main (in any form)
 	if (myId > 1) {
 		mainKanji = nodes[0].label;
 		if (onReadingsInCommon(kanji, mainKanji).length) {
-			color = '#FFD9BA';
+			color = COLOR_SHARED_ONYOMI;
 		}
 		// mark focused kanji if it matches any form of the main kanji's radical
 		if (mainKanji in kanji_defs) {
@@ -60,7 +77,8 @@ function buildDescendantsGraph(kanji, parentId) {
 			var candidates = radical_list[kangxi_id].rad;
 			for (candidate of candidates) {
 				if (candidate == kanji) {
-					color = '#B3F6B3';
+					color = COLOR_RADICAL;
+					radical_id = kangxi_id;  // save for drawOtherFormsOfRadical()
 					break;
 				}
 			}
@@ -71,31 +89,39 @@ function buildDescendantsGraph(kanji, parentId) {
 		'id': myId,
 		'font': { size: fontSize },
 		'color': color,
-		'label': kanji
+		'label': kanji,
+		'borderWidth': borderThickness
 	};
 	// unknown kanji: dashed border
 	if (!(kanji in kanji_defs)) {
 		nodeProperties.shapeProperties = {borderDashes:[5,5]};
-		nodeProperties.color = '#FFBABA';
+		nodeProperties.color = COLOR_NO_DICT;
 	}
 	nodes.push(nodeProperties);
 	if (parentId > 0) {
 		edges.push({from: parentId, to: myId, arrows:'to', length:200})
 	}
 
-	// if this kanji is a radical (anywhere), add other forms but do not expand them
-	var found_id = 0;  // < 1 means not found
-	for (kangxi_id = 1; kangxi_id < radical_list.length; kangxi_id++) {
-		var candidates = radical_list[kangxi_id].rad;
-		for (candidate of candidates) {
-			if (candidate == kanji) {
-				found_id = kangxi_id;
-				break;
-			}
-		}
+	// if this kanji is a radical of main (parentId == 1), 
+	// add other forms but do not expand them
+	if (parentId == 1 && radical_id > 0) {
+		drawOtherFormsOfRadical(kanji, myId, radical_id);
 	}
-	if (found_id > 0) {
-		var candidates = radical_list[found_id].rad;
+
+	// here's the recursion
+	if (kanji_parts[kanji]) {
+		for (subnode of kanji_parts[kanji]) {
+			buildDescendantsGraph(subnode, myId);
+		}    
+	}
+}
+
+// add other forms of the radical (if any) to the graph, but do not expand them
+function drawOtherFormsOfRadical(kanji, myId, radical_id) {
+	var fontSize = 40;  // we are never the main kanji
+	var color = COLOR_RADICAL;
+	if (radical_id > 0) {
+		var candidates = radical_list[radical_id].rad;
 		for (candidate of candidates) {
 			if (candidate != kanji) {
 				isoform_id = getNewNodeId();
@@ -106,15 +132,11 @@ function buildDescendantsGraph(kanji, parentId) {
 					'label': candidate
 				};
 				nodes.push(np);
-				edges.push({from: isoform_id, to: myId, length:200})
+				edges.push({from: isoform_id, to: myId, 
+							length:200, dashes: true, 
+							label: '異字部首', font: {align: 'horizontal'}});
 			}
 		}
-	}	
-
-	if (kanji_parts[kanji]) {
-		for (subnode of kanji_parts[kanji]) {
-			buildDescendantsGraph(subnode, myId);
-		}    
 	}
 }
 
@@ -124,16 +146,45 @@ function addParentNodes(kanji) {
 	for (parent of Object.keys(kanji_parts)) {
 		if (kanji_parts[parent].includes(kanji)) {
 			var parentId = getNewNodeId();
-			var color = '#C5B7F1';
+			var color = COLOR_PARTOF;
 			if (parentId > 1) {  // buggy; see 享
 				if (onReadingsInCommon(parent, nodes[0].label).length) {
-					color = '#FFD9BA';
+					color = COLOR_SHARED_ONYOMI;
 				}
 			}
 			nodes.push({'id': parentId, 'font': { size: 40 }, color: color, 'label': parent});
 			edges.push({from: parentId, to: 1, arrows:'to', length:200})
 		}
 	}	
+}
+
+// find kanji with same kunyomi and meaning as main
+// it could already be a component, but we assume not
+// we know the ID is 1; call this only for main kanji
+function addIjidoukun(mainKanji) {
+	var sisters = new Set();
+	for (group of ijidoukun) {
+		if (group.kanji.includes(mainKanji)) {
+			var exceptMain = group.kanji.filter(function(x) { return x !== mainKanji; });
+			for (sister of exceptMain) {
+				sisters.add(sister);
+			}
+		}
+	}
+	// now we have all our sisters
+	for (let sister of sisters) {
+		var color = COLOR_IJIDOUKUN;
+		var id = getNewNodeId();
+		var np = {
+			'id': id,
+			'font': { size: 40 },
+			'color': color,
+			'label': sister
+		};
+		nodes.push(np);
+		edges.push({from: 1, to: id, length:200, dashes: true,
+					label: '同訓', font: {align: 'horizontal'}})		
+	}
 }
 
 // for figuring out on readings in common
@@ -174,7 +225,8 @@ function update_details(kanji) {
 			inCommon = onReadingsInCommon(kanji, nodes[0].label);
 			for (reading of kanji_defs[kanji].on_readings) {
 				if (inCommon.indexOf(reading) > -1) {
-					items.push("<span style='background: #FFD9BA'>" + reading + "</span>");
+					items.push("<span style='background: " + COLOR_SHARED_ONYOMI + 
+						"'>" + reading + "</span>");
 				}
 				else {
 					items.push(reading);
@@ -226,11 +278,6 @@ function update_mru(kanji) {
 	}
 }
 
-// uses global nodes[]
-function addLegendNodes() {
-	// these get centered, shit
-}
-
 // update the graph for your kanji of interest (which is always ID 1)
 function reset_graph(kanji) {
 	nodes = [];
@@ -238,6 +285,7 @@ function reset_graph(kanji) {
 	globalId = 0;   // was 1
 	buildDescendantsGraph(kanji, 0);
 	addParentNodes(kanji);
+	addIjidoukun(kanji);
 
 	var data = {
 		nodes: new vis.DataSet(nodes),
@@ -266,16 +314,6 @@ function reset_graph(kanji) {
 	});
 	
 	network.selectNodes([1]);		
-}
-
-// the chooser is disabled for now... too many kanji to choose from,
-// and no easy way to index them.
-function populate_chooser() {
-	html = 'Choose: ';
-	for (kanji of Object.keys(kanji_parts)) {
-		html += "<a href=\"javascript:reset_graph('" + kanji + "');\">" + kanji + "</a> ";
-	}
-	document.getElementById('big_chooser').innerHTML = html;
 }
 
 // look for an interesting random kanji
@@ -317,5 +355,15 @@ function lookup() {
 	}
 }
 
-//populate_chooser();
-chooseRandom();
+// main entry point
+// todo: handle this better? query param?
+var arg = window.location.hash;
+if (arg.length) {
+	var kanji = decodeURIComponent(arg.substr(1));
+	if (kanji in kanji_parts) {
+		reset_graph(kanji);
+	}
+}
+else {
+	chooseRandom();
+}
