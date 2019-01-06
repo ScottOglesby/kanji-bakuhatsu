@@ -28,7 +28,7 @@
 				<div id="visgraph" class="portal"></div>
 				<!-- lookup -->
 				<div class="input-group" id="lookup-group">
-					<input type="text" class="form-control" id="lookup_kanji" placeholder="Search...">
+					<input type="text" class="form-control" id="lookup_kanji" onfocus="this.select();" placeholder="Search...">
 					<span class="input-group-btn">
 						<button class="btn btn-default" type="button" onclick="lookup();">
 						<span class="glyphicon glyphicon-search" aria-hidden="true"></span>
@@ -40,7 +40,7 @@
 				<!-- Trigger the modal with a button -->
 				<button type="button" id="help-group" class="btn btn-default" data-toggle="modal" data-target="#myModal">説明</button>
 
-				<!-- Modal parade of divs -->
+				<!-- Modal parade of divs for help/info overlay -->
 				<div id="myModal" class="modal fade" role="dialog">
 					<div class="modal-dialog">
 						<div class="modal-content">
@@ -95,6 +95,10 @@
 					<td id="kanji777"></td>
 					<td style="padding-left: 1em">
 					<span id="jouyou-yesno" class="kanji-group-indicator">常用</span>
+					<br />
+					<a id="jisho-link" target="_blank" href="">jisho</a>
+					<br />
+					<a id="wiktionary-link" target="_blank" href="#">wiktionary</a>
 					</td>
 					</tr>
 					</table>
