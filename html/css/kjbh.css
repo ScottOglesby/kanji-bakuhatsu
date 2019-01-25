@@ -10,6 +10,48 @@ body, html {
 #visgraph {
   height: 100vh;
 }
+h1 {
+	font-size: 2em;
+}
+h1, h2 {
+	margin-top: 0.25em;
+}
+
+/* xs < 768 */
+@media screen and (max-width: 767px) {
+    body {
+        font-size: 0.9em;
+    }
+}
+
+/* sm */
+@media screen and (min-width: 768px) {
+    body {
+        font-size: 1em;
+    }
+}
+
+/* md */
+@media screen and (min-width: 992px) {
+    body {
+        font-size: 1.2em;
+    }
+}
+
+/* lg */
+@media screen and (min-width: 1200px) {
+    body {
+        font-size: 1.3em;
+    }
+}
+/* 
+@media only screen and (max-width: 992px){
+#visgraph {
+	height:80vh;
+}
+ */
+
+
 #details table th {
 	white-space: nowrap;
 	vertical-align: top;
