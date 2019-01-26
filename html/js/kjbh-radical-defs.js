@@ -1,5 +1,6 @@
 // from https://en.wikipedia.org/wiki/List_of_kanji_radicals_by_stroke_count
 // position in the array is Kangxi radical index (1 to 214)
+// mostly generated from source except fixups for left and right mound/city radical
 var radical_list = [
 {
 	"rad": ["zero"],
@@ -654,7 +655,7 @@ var radical_list = [
 	"def": "walk (しんにゅう shinnyū, 之繞)" 
 },
 {
-	"rad": ["邑", "⻏", "阝"],
+	"rad": ["邑", "⻏"],
 	"def": "town (阝 right) (むら mura)" 
 },
 {
@@ -682,7 +683,7 @@ var radical_list = [
 	"def": "gate (もん mon)" 
 },
 {
-	"rad": ["阜", "⻖", "阝"],
+	"rad": ["阜", "⻖"],
 	"def": "mound, dam (阝 left) (ぎふのふ gifunofu, 岐阜の阜)" 
 },
 {
