@@ -535,40 +535,8 @@ function lookupOne(kanji) {
 	}
 }
 
-// for things it's inconvenient to update in place right now
-// better left and right mound, city radicals
-function patchDictionary() {
-	// u+2ed6
-	kanji_defs['⻖'] = {
-        "on_readings": [],
-        "kun_readings": [],
-        "meanings": [
-            "mound radical (left)"
-        ],
-        "is_jouyou": false,
-	};
-	// u+2ecf
-	kanji_defs['⻏'] = {
-        "on_readings": [],
-        "kun_readings": [],
-        "meanings": [
-            "town radical (right)"
-        ],
-        "is_jouyou": false,
-	};
-	kanji_defs['訁'] = {
-        "on_readings": [],
-        "kun_readings": [],
-        "meanings": [
-            "combining form of speech radical (言)"
-        ],
-        "is_jouyou": false,
-	};
-}
-
 // main entry point
 // handle /?k=X query param; if not present, choose a random kanji to start with
-patchDictionary();
 const urlParams = new URLSearchParams(window.location.search);
 const kval = urlParams.get('k');
 var paramFound = false;
